@@ -2,12 +2,13 @@
 // versions:
 //   sqlc v1.30.0
 
-package db
+package repository
 
 import (
 	"database/sql/driver"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -31,8 +32,8 @@ func (e *AuthProviderType) Scan(src interface{}) error {
 }
 
 type NullAuthProviderType struct {
-	AuthProviderType AuthProviderType
-	Valid            bool // Valid is true if AuthProviderType is not NULL
+	AuthProviderType AuthProviderType `json:"auth_provider_type"`
+	Valid            bool             `json:"valid"` // Valid is true if AuthProviderType is not NULL
 }
 
 // Scan implements the Scanner interface.
@@ -74,8 +75,8 @@ func (e *MemberRoleType) Scan(src interface{}) error {
 }
 
 type NullMemberRoleType struct {
-	MemberRoleType MemberRoleType
-	Valid          bool // Valid is true if MemberRoleType is not NULL
+	MemberRoleType MemberRoleType `json:"member_role_type"`
+	Valid          bool           `json:"valid"` // Valid is true if MemberRoleType is not NULL
 }
 
 // Scan implements the Scanner interface.
@@ -97,37 +98,37 @@ func (ns NullMemberRoleType) Value() (driver.Value, error) {
 }
 
 type RoomMember struct {
-	RoomID    pgtype.UUID
-	UserID    pgtype.UUID
-	Role      MemberRoleType
-	CreatedAt pgtype.Timestamptz
+	RoomID    uuid.UUID          `json:"room_id"`
+	UserID    uuid.UUID          `json:"user_id"`
+	Role      MemberRoleType     `json:"role"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 
 type SecretItem struct {
-	ID               pgtype.UUID
-	RoomID           pgtype.UUID
-	CreatorID        pgtype.UUID
-	EncryptedContent []byte
-	Nonce            []byte
-	IsBurned         pgtype.Bool
-	CreatedAt        pgtype.Timestamptz
-	BurnedAt         pgtype.Timestamptz
+	ID               uuid.UUID          `json:"id"`
+	RoomID           uuid.UUID          `json:"room_id"`
+	CreatorID        uuid.UUID          `json:"creator_id"`
+	EncryptedContent []byte             `json:"encrypted_content"`
+	Nonce            []byte             `json:"nonce"`
+	IsBurned         pgtype.Bool        `json:"is_burned"`
+	CreatedAt        pgtype.Timestamptz `json:"created_at"`
+	BurnedAt         pgtype.Timestamptz `json:"burned_at"`
 }
 
 type User struct {
-	ID         pgtype.UUID
-	Email      string
-	Provider   AuthProviderType
-	ProviderID string
-	CreatedAt  pgtype.Timestamptz
+	ID         uuid.UUID          `json:"id"`
+	Email      string             `json:"email"`
+	Provider   AuthProviderType   `json:"provider"`
+	ProviderID string             `json:"provider_id"`
+	CreatedAt  pgtype.Timestamptz `json:"created_at"`
 }
 
 type VaultRoom struct {
-	ID         pgtype.UUID
-	OwnerID    pgtype.UUID
-	Name       string
-	AccessCode pgtype.Text
-	ExpiresAt  pgtype.Timestamptz
-	IsActive   pgtype.Bool
-	CreatedAt  pgtype.Timestamptz
+	ID         uuid.UUID          `json:"id"`
+	OwnerID    uuid.UUID          `json:"owner_id"`
+	Name       string             `json:"name"`
+	AccessCode pgtype.Text        `json:"access_code"`
+	ExpiresAt  pgtype.Timestamptz `json:"expires_at"`
+	IsActive   pgtype.Bool        `json:"is_active"`
+	CreatedAt  pgtype.Timestamptz `json:"created_at"`
 }

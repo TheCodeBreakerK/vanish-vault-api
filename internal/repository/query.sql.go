@@ -3,11 +3,12 @@
 //   sqlc v1.30.0
 // source: query.sql
 
-package db
+package repository
 
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -18,9 +19,9 @@ RETURNING room_id, user_id, role, created_at
 `
 
 type AddMemberToRoomParams struct {
-	RoomID pgtype.UUID
-	UserID pgtype.UUID
-	Role   MemberRoleType
+	RoomID uuid.UUID      `json:"room_id"`
+	UserID uuid.UUID      `json:"user_id"`
+	Role   MemberRoleType `json:"role"`
 }
 
 func (q *Queries) AddMemberToRoom(ctx context.Context, arg AddMemberToRoomParams) (RoomMember, error) {
@@ -41,7 +42,7 @@ SET is_burned = true, burned_at = CURRENT_TIMESTAMP
 WHERE id = $1
 `
 
-func (q *Queries) BurnSecret(ctx context.Context, id pgtype.UUID) error {
+func (q *Queries) BurnSecret(ctx context.Context, id uuid.UUID) error {
 	_, err := q.db.Exec(ctx, burnSecret, id)
 	return err
 }
@@ -53,10 +54,10 @@ RETURNING id, owner_id, name, access_code, expires_at, is_active, created_at
 `
 
 type CreateRoomParams struct {
-	OwnerID    pgtype.UUID
-	Name       string
-	AccessCode pgtype.Text
-	ExpiresAt  pgtype.Timestamptz
+	OwnerID    uuid.UUID          `json:"owner_id"`
+	Name       string             `json:"name"`
+	AccessCode pgtype.Text        `json:"access_code"`
+	ExpiresAt  pgtype.Timestamptz `json:"expires_at"`
 }
 
 func (q *Queries) CreateRoom(ctx context.Context, arg CreateRoomParams) (VaultRoom, error) {
@@ -86,10 +87,10 @@ RETURNING id, room_id, creator_id, encrypted_content, nonce, is_burned, created_
 `
 
 type CreateSecretParams struct {
-	RoomID           pgtype.UUID
-	CreatorID        pgtype.UUID
-	EncryptedContent []byte
-	Nonce            []byte
+	RoomID           uuid.UUID `json:"room_id"`
+	CreatorID        uuid.UUID `json:"creator_id"`
+	EncryptedContent []byte    `json:"encrypted_content"`
+	Nonce            []byte    `json:"nonce"`
 }
 
 func (q *Queries) CreateSecret(ctx context.Context, arg CreateSecretParams) (SecretItem, error) {
@@ -120,9 +121,9 @@ RETURNING id, email, provider, provider_id, created_at
 `
 
 type CreateUserParams struct {
-	Email      string
-	Provider   AuthProviderType
-	ProviderID string
+	Email      string           `json:"email"`
+	Provider   AuthProviderType `json:"provider"`
+	ProviderID string           `json:"provider_id"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
@@ -144,8 +145,8 @@ WHERE id = $1 AND owner_id = $2
 `
 
 type DeleteRoomParams struct {
-	ID      pgtype.UUID
-	OwnerID pgtype.UUID
+	ID      uuid.UUID `json:"id"`
+	OwnerID uuid.UUID `json:"owner_id"`
 }
 
 func (q *Queries) DeleteRoom(ctx context.Context, arg DeleteRoomParams) error {
@@ -159,8 +160,8 @@ WHERE room_id = $1 AND user_id = $2
 `
 
 type GetMemberRoleParams struct {
-	RoomID pgtype.UUID
-	UserID pgtype.UUID
+	RoomID uuid.UUID `json:"room_id"`
+	UserID uuid.UUID `json:"user_id"`
 }
 
 func (q *Queries) GetMemberRole(ctx context.Context, arg GetMemberRoleParams) (MemberRoleType, error) {
@@ -177,8 +178,8 @@ LIMIT 1
 `
 
 type GetSecretForViewParams struct {
-	ID     pgtype.UUID
-	RoomID pgtype.UUID
+	ID     uuid.UUID `json:"id"`
+	RoomID uuid.UUID `json:"room_id"`
 }
 
 func (q *Queries) GetSecretForView(ctx context.Context, arg GetSecretForViewParams) (SecretItem, error) {
@@ -203,8 +204,8 @@ WHERE provider = $1 AND provider_id = $2 LIMIT 1
 `
 
 type GetUserByProviderParams struct {
-	Provider   AuthProviderType
-	ProviderID string
+	Provider   AuthProviderType `json:"provider"`
+	ProviderID string           `json:"provider_id"`
 }
 
 func (q *Queries) GetUserByProvider(ctx context.Context, arg GetUserByProviderParams) (User, error) {
@@ -226,13 +227,13 @@ JOIN room_members m ON r.id = m.room_id
 WHERE m.user_id = $1 AND r.is_active = true
 `
 
-func (q *Queries) ListMyRooms(ctx context.Context, userID pgtype.UUID) ([]VaultRoom, error) {
+func (q *Queries) ListMyRooms(ctx context.Context, userID uuid.UUID) ([]VaultRoom, error) {
 	rows, err := q.db.Query(ctx, listMyRooms, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []VaultRoom
+	items := []VaultRoom{}
 	for rows.Next() {
 		var i VaultRoom
 		if err := rows.Scan(
@@ -261,19 +262,19 @@ WHERE room_id = $1 AND is_burned = false
 `
 
 type ListSecretsByRoomRow struct {
-	ID        pgtype.UUID
-	CreatorID pgtype.UUID
-	CreatedAt pgtype.Timestamptz
-	IsBurned  pgtype.Bool
+	ID        uuid.UUID          `json:"id"`
+	CreatorID uuid.UUID          `json:"creator_id"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	IsBurned  pgtype.Bool        `json:"is_burned"`
 }
 
-func (q *Queries) ListSecretsByRoom(ctx context.Context, roomID pgtype.UUID) ([]ListSecretsByRoomRow, error) {
+func (q *Queries) ListSecretsByRoom(ctx context.Context, roomID uuid.UUID) ([]ListSecretsByRoomRow, error) {
 	rows, err := q.db.Query(ctx, listSecretsByRoom, roomID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []ListSecretsByRoomRow
+	items := []ListSecretsByRoomRow{}
 	for rows.Next() {
 		var i ListSecretsByRoomRow
 		if err := rows.Scan(
