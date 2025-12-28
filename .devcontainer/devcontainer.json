@@ -1,0 +1,24 @@
+{
+	"name": "Vanish Vault Dev",
+	"dockerComposeFile": [
+		"../compose.yaml",
+		"../compose.override.yaml"
+	],
+	"service": "api",
+	"workspaceFolder": "/app",
+	"features": {
+		"ghcr.io/devcontainers/features/common-utils:2": {},
+		"ghcr.io/stuartleeks/dev-container-features/shell-history:0": {},
+		"ghcr.io/devcontainers-extra/features/zsh-plugins:0": {}
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"golang.Go",
+				"mikestead.dotenv",
+				"redhat.vscode-yaml",
+				"tamasfe.even-better-toml"
+			]
+		}
+	}
+}

@@ -1,0 +1,9 @@
+.git
+.build
+build/
+tmp/
+scripts/
+secrets/
+.devcontainer
+README.md
+LICENSE

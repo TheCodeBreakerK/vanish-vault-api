@@ -1,0 +1,27 @@
+services:
+  api:
+    build:
+      context: .
+      target: dev
+    image: vanish-vault-api:dev
+    volumes:
+      - ./:/app:cached
+      - /app/tmp
+    environment:
+      - ENVIRONMENT=${ENVIRONMENT}
+      - DEBUG=${DEBUG}
+
+  db:
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+
+  caddy:
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./configs/caddy/Caddyfile:/etc/caddy/Caddyfile 
+      - caddy_data:/data
+      - caddy_config:/config
