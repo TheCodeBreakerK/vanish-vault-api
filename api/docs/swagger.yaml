@@ -1,0 +1,20 @@
+basePath: /api/v1
+externalDocs:
+  description: OpenAPI
+  url: https://swagger.io/resources/open-api/
+host: localhost:8080
+info:
+  contact:
+    email: kelvin.oliveira.dev@pm.me
+    name: API Support
+    url: https://github.com/TheCodeBreakerK/vanish-vault-api/support
+  description: A secure, ephemeral secret-sharing service with OAuth2 and private
+    rooms.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: VanishVault API
+  version: 1.0.0
+paths: {}
+swagger: "2.0"
