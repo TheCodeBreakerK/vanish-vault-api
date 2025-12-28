@@ -1,0 +1,14 @@
+localhost {
+  encode gzip
+
+  reverse_proxy /api/* api:8080
+  reverse_proxy /swagger/* api:8080
+  reverse_proxy /docs/* api:8080
+
+  redir / /swagger/index.html 302
+
+  log {
+      output stdout
+      level INFO
+  }
+}
