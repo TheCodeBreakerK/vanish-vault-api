@@ -2,20 +2,14 @@
 package main
 
 import (
-	"fmt"
-	"log"
-	"os"
-	"time"
+	"context"
 
+	_ "github.com/TheCodeBreakerK/vanish-vault-api/api/docs"
+	"github.com/TheCodeBreakerK/vanish-vault-api/configs"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-
-	"github.com/golang-migrate/migrate/v4"
-	_ "github.com/golang-migrate/migrate/v4/database/postgres"
-	_ "github.com/golang-migrate/migrate/v4/source/file"
-
-	_ "github.com/TheCodeBreakerK/vanish-vault-api/api/docs"
+	"go.uber.org/zap"
 )
 
 // @title           VanishVault API
@@ -36,45 +30,29 @@ import (
 // @externalDocs.description  OpenAPI
 // @externalDocs.url          https://swagger.io/resources/open-api/
 func main() {
+	log := configs.GetLogger()
+	defer configs.Sync()
+
+	cfg := configs.LoadConfig()
+
+	dbPool := configs.NewDatabase(context.Background(), cfg)
+	defer dbPool.Close()
+
 	r := gin.Default()
 
 	r.Any("/healthz", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"status":    "ok",
-			"timestamp": time.Now().Unix(),
-		})
+		if err := dbPool.Ping(c); err != nil {
+			c.JSON(500, gin.H{"status": "error", "db": "disconnected"})
+			return
+		}
+		c.JSON(200, gin.H{"status": "ok"})
 	})
 
-	runDBMigrations()
+	log.Info("Starting server...", zap.String("port", "8080"), zap.String("env", cfg.Environment))
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	if err := r.Run(":8080"); err != nil {
-		log.Fatalf("could not run server: %v", err)
+		log.Error("Failed to start server", zap.Error(err))
 	}
-}
-
-func runDBMigrations() {
-	user := os.Getenv("POSTGRES_USER")
-	pass := os.Getenv("POSTGRES_PASSWORD")
-	dbName := os.Getenv("POSTGRES_DB")
-	host := os.Getenv("POSTGRES_HOST")
-
-	dbURL := fmt.Sprintf("postgres://%s:%s@%s:5432/%s?sslmode=disable",
-		user, pass, host, dbName)
-
-	m, err := migrate.New(
-		"file://db/migrations",
-		dbURL,
-	)
-
-	if err != nil {
-		log.Fatalf("could not create migrate instance: %v", err)
-	}
-
-	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
-		log.Fatalf("could not apply migrations: %v", err)
-	}
-
-	log.Println("Migrations applied successfully!")
 }
