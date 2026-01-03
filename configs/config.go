@@ -10,9 +10,6 @@ import (
 
 // Conf holds all the configuration for the application.
 type Conf struct {
-	Environment string `mapstructure:"ENVIRONMENT"`
-	Debug       bool   `mapstructure:"DEBUG"`
-
 	DBHost     string `mapstructure:"POSTGRES_HOST"`
 	DBPort     string `mapstructure:"POSTGRES_PORT"`
 	DBName     string `mapstructure:"POSTGRES_DB"`
@@ -29,7 +26,6 @@ func LoadConfig() *Conf {
 	viper.AutomaticEnv()
 
 	viper.SetDefault("POSTGRES_PORT", "5432")
-	viper.SetDefault("ENVIRONMENT", "development")
 
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
