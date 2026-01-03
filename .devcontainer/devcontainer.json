@@ -18,7 +18,8 @@
 				"mikestead.dotenv",
 				"redhat.vscode-yaml",
 				"tamasfe.even-better-toml",
-				"ms-vscode.makefile-tools"
+				"ms-vscode.makefile-tools",
+				"matthewpi.caddyfile-support"
 			]
 		}
 	}

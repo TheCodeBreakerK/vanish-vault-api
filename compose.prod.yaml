@@ -7,6 +7,8 @@ services:
     restart: always
     secrets:
       - pg_password
+    environment:
+    - GIN_MODE=release
 
   db:
     restart: always

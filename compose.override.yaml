@@ -8,8 +8,7 @@ services:
       - ./:/app:cached
       - /app/tmp
     environment:
-      - ENVIRONMENT=${ENVIRONMENT}
-      - DEBUG=${DEBUG}
+      - GIN_MODE=debug
 
   db:
     ports:
