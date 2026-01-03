@@ -1,8 +1,7 @@
-basePath: /api/v1
 externalDocs:
   description: OpenAPI
   url: https://swagger.io/resources/open-api/
-host: localhost:8080
+host: localhost
 info:
   contact:
     email: kelvin.oliveira.dev@pm.me
@@ -16,5 +15,403 @@ info:
   termsOfService: http://swagger.io/terms/
   title: VanishVault API
   version: 1.0.0
-paths: {}
+paths:
+  /api/v1/auth/callback/{provider}:
+    get:
+      description: Receives the authorization code from the provider, exchanges it
+        for tokens, and generates the VanishVault access JWT.
+      parameters:
+      - description: OAuth2 Provider
+        enum:
+        - google
+        - github
+        in: path
+        name: provider
+        required: true
+        type: string
+      - description: Authorization code returned by the provider
+        in: query
+        name: code
+        required: true
+        type: string
+      - description: CSRF security state
+        in: query
+        name: state
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Access tokens (Access Token and Refresh Token)
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Token exchange failure or invalid state
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal error processing login
+          schema:
+            additionalProperties: true
+            type: object
+      summary: OAuth2 Callback
+      tags:
+      - Auth
+  /api/v1/auth/login/{provider}:
+    get:
+      description: Redirects the user to the specified authentication provider (Google,
+        GitHub) to start the secure session.
+      parameters:
+      - description: OAuth2 Provider (e.g., google, github)
+        enum:
+        - google
+        - github
+        in: path
+        name: provider
+        required: true
+        type: string
+      responses:
+        "302":
+          description: Temporary redirection to the provider
+          schema:
+            type: string
+        "400":
+          description: Invalid provider
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Initiate OAuth2 Login
+      tags:
+      - Auth
+  /api/v1/auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Generates a new Access Token using a valid Refresh Token, keeping
+        the session active without re-login.
+      parameters:
+      - description: Object containing the refresh_token
+        in: body
+        name: request
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: New Access Token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Invalid or expired Refresh Token
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Refresh JWT Token
+      tags:
+      - Auth
+  /api/v1/rooms:
+    get:
+      description: Lists rooms available to the user (those created by them or public,
+        depending on rules).
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of rooms
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List Rooms
+      tags:
+      - Rooms
+    post:
+      consumes:
+      - application/json
+      description: Creates a new encrypted private room for ephemeral data sharing.
+      parameters:
+      - description: Room data (name, optional password, expiration time)
+        in: body
+        name: request
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created room details
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid input data
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create Secure Room
+      tags:
+      - Rooms
+  /api/v1/rooms/{id}:
+    delete:
+      description: Permanently removes a room and all associated secrets (Immediate
+        purge).
+      parameters:
+      - description: Room ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content - Room successfully deleted
+        "403":
+          description: No permission to delete this room
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete Room
+      tags:
+      - Rooms
+    get:
+      description: Returns metadata for a specific room by ID.
+      parameters:
+      - description: Room ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Room data
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Room not found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get Room Details
+      tags:
+      - Rooms
+  /api/v1/rooms/{id}/join:
+    post:
+      consumes:
+      - application/json
+      description: Allows an authenticated user to join a room (may require password
+        in body).
+      parameters:
+      - description: Room ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Room password (if applicable)
+        in: body
+        name: request
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Join confirmation
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Incorrect password or access denied
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Join Room
+      tags:
+      - Rooms
+  /api/v1/rooms/{id}/leave:
+    post:
+      description: Removes the current user from the room's participant list.
+      parameters:
+      - description: Room ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Leave confirmation
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Leave Room
+      tags:
+      - Rooms
+  /api/v1/rooms/{id}/secrets:
+    get:
+      description: Lists secrets available in the room. Sensitive content may be hidden
+        in this listing.
+      parameters:
+      - description: Room ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of secrets (metadata)
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+        "403":
+          description: Access denied to the room
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List Room Secrets
+      tags:
+      - Secrets
+    post:
+      consumes:
+      - application/json
+      description: Stores a new encrypted secret (AES-256) within a specific room.
+      parameters:
+      - description: Room ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Secret content and visibility settings
+        in: body
+        name: request
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created secret metadata (ID, date)
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: User is not a member of the room
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Room not found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Add Secret
+      tags:
+      - Secrets
+  /api/v1/rooms/{id}/secrets/{secretId}:
+    get:
+      description: Retrieves and decrypts the content of a specific secret. May trigger
+        "Burn on Read" rule (delete after reading).
+      parameters:
+      - description: Room ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Secret ID (UUID)
+        in: path
+        name: secretId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Decrypted secret content
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Secret not found or already expired
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Read Secret (Decrypt)
+      tags:
+      - Secrets
+  /healthz:
+    get:
+      description: Checks if the service and its dependencies (database) are operational.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Service is up and running
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "503":
+          description: Service or dependencies are down
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Health Check
+      tags:
+      - Infra
 swagger: "2.0"
+tags:
+- description: Service health, monitoring and system-level endpoints
+  name: Infra
+- description: Authentication and session management
+  name: Auth
+- description: Private encrypted room management
+  name: Rooms
+- description: Ephemeral secret management and P2P messaging
+  name: Secrets
