@@ -4,12 +4,10 @@ package main
 import (
 	"context"
 
+	// Importing the docs package to register Swagger documentation
 	_ "github.com/TheCodeBreakerK/vanish-vault-api/api/docs"
 	"github.com/TheCodeBreakerK/vanish-vault-api/configs"
-	"github.com/gin-gonic/gin"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
-	"go.uber.org/zap"
+	"github.com/TheCodeBreakerK/vanish-vault-api/internal/router"
 )
 
 // @title           VanishVault API
@@ -24,8 +22,19 @@ import (
 // @license.name    Apache 2.0
 // @license.url     http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host            localhost:8080
-// @BasePath        /api/v1
+// @host            localhost
+
+// @tag.name         Infra
+// @tag.description  Service health, monitoring and system-level endpoints
+
+// @tag.name         Auth
+// @tag.description  Authentication and session management
+
+// @tag.name         Rooms
+// @tag.description  Private encrypted room management
+
+// @tag.name         Secrets
+// @tag.description  Ephemeral secret management and P2P messaging
 
 // @externalDocs.description  OpenAPI
 // @externalDocs.url          https://swagger.io/resources/open-api/
@@ -38,21 +47,6 @@ func main() {
 	dbPool := configs.NewDatabase(context.Background(), cfg)
 	defer dbPool.Close()
 
-	r := gin.Default()
-
-	r.Any("/healthz", func(c *gin.Context) {
-		if err := dbPool.Ping(c); err != nil {
-			c.JSON(500, gin.H{"status": "error", "db": "disconnected"})
-			return
-		}
-		c.JSON(200, gin.H{"status": "ok"})
-	})
-
-	log.Info("Starting server...", zap.String("port", "8080"), zap.String("env", cfg.Environment))
-
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
-	if err := r.Run(":8080"); err != nil {
-		log.Error("Failed to start server", zap.Error(err))
-	}
+	appRouter := router.NewRouter(cfg, log, dbPool)
+	appRouter.Setup()
 }
