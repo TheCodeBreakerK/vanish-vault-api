@@ -121,7 +121,7 @@ RETURNING id, email, provider, provider_id, created_at
 `
 
 type CreateUserParams struct {
-	Email      string           `json:"email"`
+	Email      pgtype.Text      `json:"email"`
 	Provider   AuthProviderType `json:"provider"`
 	ProviderID string           `json:"provider_id"`
 }

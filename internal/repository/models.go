@@ -117,7 +117,7 @@ type SecretItem struct {
 
 type User struct {
 	ID         uuid.UUID          `json:"id"`
-	Email      string             `json:"email"`
+	Email      pgtype.Text        `json:"email"`
 	Provider   AuthProviderType   `json:"provider"`
 	ProviderID string             `json:"provider_id"`
 	CreatedAt  pgtype.Timestamptz `json:"created_at"`

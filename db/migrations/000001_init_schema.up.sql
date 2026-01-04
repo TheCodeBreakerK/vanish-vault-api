@@ -5,12 +5,13 @@ CREATE TYPE member_role_type AS ENUM ('admin', 'editor', 'viewer');
 
 CREATE TABLE users (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  email VARCHAR(255) NOT NULL UNIQUE,
+  email VARCHAR(255),
   provider auth_provider_type NOT NULL,
   provider_id VARCHAR(255) NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
 
-  CONSTRAINT unique_provider_user UNIQUE (provider, provider_id)
+  CONSTRAINT unique_provider_user UNIQUE (provider, provider_id),
+  CONSTRAINT unique_email_per_provider UNIQUE (email, provider)
 );
 
 CREATE TABLE vault_rooms (
