@@ -87,11 +87,14 @@ const docTemplate = `{
         },
         "/api/v1/auth/login/{provider}": {
             "get": {
-                "description": "Redirects the user to the specified authentication provider (Google, GitHub) to start the secure session.",
+                "description": "Returns the URL to redirect the user to the specified authentication provider or redirects automatically based on Accept header.",
+                "produces": [
+                    "application/json"
+                ],
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Initiate OAuth2 Login",
+                "summary": "Get OAuth2 Login URL",
                 "parameters": [
                     {
                         "enum": [
@@ -106,8 +109,14 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "302": {
-                        "description": "Temporary redirection to the provider",
+                    "200": {
+                        "description": "Returns JSON with auth URL (if Accept: application/json)",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_TheCodeBreakerK_vanish-vault-api_internal_dto.LoginResponse"
+                        }
+                    },
+                    "307": {
+                        "description": "Redirects to provider (if accessed via browser)",
                         "schema": {
                             "type": "string"
                         }
@@ -115,8 +124,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Invalid provider",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/github_com_TheCodeBreakerK_vanish-vault-api_internal_dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_TheCodeBreakerK_vanish-vault-api_internal_dto.ErrorResponse"
                         }
                     }
                 }
@@ -587,21 +601,56 @@ const docTemplate = `{
                     "200": {
                         "description": "Service is up and running",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/github_com_TheCodeBreakerK_vanish-vault-api_internal_dto.HealthCheckResponse"
                         }
                     },
                     "503": {
                         "description": "Service or dependencies are down",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/github_com_TheCodeBreakerK_vanish-vault-api_internal_dto.ErrorResponse"
                         }
                     }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "github_com_TheCodeBreakerK_vanish-vault-api_internal_dto.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_TheCodeBreakerK_vanish-vault-api_internal_dto.HealthCheckResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "service": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "ts": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_TheCodeBreakerK_vanish-vault-api_internal_dto.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "url": {
+                    "type": "string"
                 }
             }
         }

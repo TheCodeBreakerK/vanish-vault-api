@@ -1,3 +1,29 @@
+definitions:
+  github_com_TheCodeBreakerK_vanish-vault-api_internal_dto.ErrorResponse:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  github_com_TheCodeBreakerK_vanish-vault-api_internal_dto.HealthCheckResponse:
+    properties:
+      code:
+        type: integer
+      service:
+        type: string
+      status:
+        type: string
+      ts:
+        type: string
+    type: object
+  github_com_TheCodeBreakerK_vanish-vault-api_internal_dto.LoginResponse:
+    properties:
+      url:
+        type: string
+    type: object
 externalDocs:
   description: OpenAPI
   url: https://swagger.io/resources/open-api/
@@ -61,8 +87,8 @@ paths:
       - Auth
   /api/v1/auth/login/{provider}:
     get:
-      description: Redirects the user to the specified authentication provider (Google,
-        GitHub) to start the secure session.
+      description: Returns the URL to redirect the user to the specified authentication
+        provider or redirects automatically based on Accept header.
       parameters:
       - description: OAuth2 Provider (e.g., google, github)
         enum:
@@ -72,17 +98,26 @@ paths:
         name: provider
         required: true
         type: string
+      produces:
+      - application/json
       responses:
-        "302":
-          description: Temporary redirection to the provider
+        "200":
+          description: 'Returns JSON with auth URL (if Accept: application/json)'
+          schema:
+            $ref: '#/definitions/github_com_TheCodeBreakerK_vanish-vault-api_internal_dto.LoginResponse'
+        "307":
+          description: Redirects to provider (if accessed via browser)
           schema:
             type: string
         "400":
           description: Invalid provider
           schema:
-            additionalProperties: true
-            type: object
-      summary: Initiate OAuth2 Login
+            $ref: '#/definitions/github_com_TheCodeBreakerK_vanish-vault-api_internal_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_TheCodeBreakerK_vanish-vault-api_internal_dto.ErrorResponse'
+      summary: Get OAuth2 Login URL
       tags:
       - Auth
   /api/v1/auth/refresh:
@@ -393,15 +428,11 @@ paths:
         "200":
           description: Service is up and running
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_TheCodeBreakerK_vanish-vault-api_internal_dto.HealthCheckResponse'
         "503":
           description: Service or dependencies are down
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_TheCodeBreakerK_vanish-vault-api_internal_dto.ErrorResponse'
       summary: Health Check
       tags:
       - Infra
