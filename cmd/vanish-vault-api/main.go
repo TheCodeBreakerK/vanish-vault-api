@@ -42,11 +42,16 @@ func main() {
 	log := configs.GetLogger()
 	defer configs.Sync()
 
-	cfg := configs.LoadConfig()
+	cfg := configs.LoadConfig(log)
 
-	dbPool := configs.NewDatabase(context.Background(), cfg)
+	ctx := context.Background()
+
+	dbPool := configs.NewDatabase(ctx, cfg, log)
 	defer dbPool.Close()
 
-	appRouter := router.NewRouter(cfg, log, dbPool)
+	rdb := configs.NewRedisClient(ctx, cfg, log)
+	defer rdb.Close()
+
+	appRouter := router.NewRouter(cfg, log, dbPool, rdb)
 	appRouter.Setup()
 }

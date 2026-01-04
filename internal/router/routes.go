@@ -16,8 +16,8 @@ func (r *Router) setupRoutes(engine *gin.Engine) {
 
 	repo := repository.New(r.db)
 
-	engine.GET("/healthz", infraHandler.NewHealthCheckHandler(r.log, r.db))
-	engine.HEAD("/healthz", infraHandler.NewHealthCheckHandler(r.log, r.db))
+	engine.GET("/healthz", infraHandler.NewHealthCheckHandler(r.log, r.db, r.rdb))
+	engine.HEAD("/healthz", infraHandler.NewHealthCheckHandler(r.log, r.db, r.rdb))
 	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	v1 := engine.Group("/api/v1")

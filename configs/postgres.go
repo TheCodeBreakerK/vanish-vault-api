@@ -4,19 +4,18 @@ import (
 	"context"
 	"time"
 
-	migrations "github.com/TheCodeBreakerK/vanish-vault-api/db/migrations"
-	migrate "github.com/golang-migrate/migrate/v4"
+	"github.com/TheCodeBreakerK/vanish-vault-api/db/migrations"
+	"github.com/golang-migrate/migrate/v4"
 
 	// Driver necessary for golang-migrate to talk to postgres
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
-	iofs "github.com/golang-migrate/migrate/v4/source/iofs"
-	pgxpool "github.com/jackc/pgx/v5/pgxpool"
-	zap "go.uber.org/zap"
+	"github.com/golang-migrate/migrate/v4/source/iofs"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"go.uber.org/zap"
 )
 
 // NewDatabase initializes a new pgx connection pool and runs migrations.
-func NewDatabase(ctx context.Context, cfg *Conf) *pgxpool.Pool {
-	log := GetLogger()
+func NewDatabase(ctx context.Context, cfg *Conf, log *zap.Logger) *pgxpool.Pool {
 	dsn := cfg.GetDBURL()
 
 	poolConfig, err := pgxpool.ParseConfig(dsn)

@@ -5,6 +5,7 @@ import (
 	"github.com/TheCodeBreakerK/vanish-vault-api/configs"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
 )
 
@@ -13,14 +14,16 @@ type Router struct {
 	cfg *configs.Conf
 	log *zap.Logger
 	db  *pgxpool.Pool
+	rdb *redis.Client
 }
 
 // NewRouter creates a new Router instance with the given configuration and handlers.
-func NewRouter(cfg *configs.Conf, log *zap.Logger, db *pgxpool.Pool) *Router {
+func NewRouter(cfg *configs.Conf, log *zap.Logger, db *pgxpool.Pool, rdb *redis.Client) *Router {
 	return &Router{
 		cfg: cfg,
 		log: log,
 		db:  db,
+		rdb: rdb,
 	}
 }
 
