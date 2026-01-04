@@ -1,8 +1,8 @@
 package dto
 
-// ErrorResponse defines the standard structure for all API error messages.
-type ErrorResponse struct {
+// ErrorResponseDto defines the standard structure for all API error messages.
+type ErrorResponseDto struct {
 	Code    int    `json:"code"`
-	Status  string `json:"status"`
 	Message string `json:"message,omitempty"`
+	Status  string `json:"status"`
 }
