@@ -10,11 +10,13 @@ import (
 
 // Conf holds all the configuration for the application.
 type Conf struct {
-	DBHost         string `mapstructure:"POSTGRES_HOST"`
-	DBPort         string `mapstructure:"POSTGRES_PORT"`
-	DBName         string `mapstructure:"POSTGRES_DB"`
-	DBUser         string `mapstructure:"POSTGRES_USER"`
-	DBPassword     string `mapstructure:"POSTGRES_PASSWORD"`
+	GinMode string `mapstructure:"GIN_MODE"`
+
+	DBHost     string `mapstructure:"POSTGRES_HOST"`
+	DBPort     string `mapstructure:"POSTGRES_PORT"`
+	DBName     string `mapstructure:"POSTGRES_DB"`
+	DBUser     string `mapstructure:"POSTGRES_USER"`
+	DBPassword string `mapstructure:"POSTGRES_PASSWORD"`
 
 	GoogleClientID string `mapstructure:"GOOGLE_CLIENT_ID"`
 	GoogleSecret   string `mapstructure:"GOOGLE_CLIENT_SECRET"`
@@ -22,9 +24,12 @@ type Conf struct {
 	GithubClientID string `mapstructure:"GITHUB_CLIENT_ID"`
 	GithubSecret   string `mapstructure:"GITHUB_CLIENT_SECRET"`
 
-	RedisAddr      string `mapstructure:"REDIS_ADDR"`
-	RedisPassword  string `mapstructure:"REDIS_PASSWORD"`
-	RedisDB        int    `mapstructure:"REDIS_DB"`
+	RedisAddr     string `mapstructure:"REDIS_ADDR"`
+	RedisPassword string `mapstructure:"REDIS_PASSWORD"`
+	RedisDB       int    `mapstructure:"REDIS_DB"`
+
+	JWTSecret          string `mapstructure:"JWT_SECRET"`
+	JWTExpirationHours int    `mapstructure:"JWT_EXPIRATION_HOURS"`
 }
 
 // LoadConfig reads the .env file and unmarshals it into the Conf struct.

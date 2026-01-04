@@ -2,10 +2,12 @@ package configs
 
 import (
 	"context"
+
 	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
 )
 
+// NewRedisClient initializes and returns a Redis client based on the provided configuration.
 func NewRedisClient(ctx context.Context, cfg *Conf, log *zap.Logger) *redis.Client {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     cfg.RedisAddr,
