@@ -24,23 +24,28 @@ import (
 
 // @host            localhost
 
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Type "Bearer " followed by your JWT token.
+
 // @tag.name         Infra
-// @tag.description  Service health, monitoring and system-level endpoints
+// @tag.description  Endpoints for system health monitoring, diagnostic checks, and operational status.
 
 // @tag.name         Auth
-// @tag.description  Authentication and session management
+// @tag.description  Secure identity verification and session management via OAuth2 providers and JWT issuance.
 
 // @tag.name         Rooms
-// @tag.description  Private encrypted room management
+// @tag.description  Management of private encrypted communication spaces, including access control and lifecycle.
 
 // @tag.name         Secrets
-// @tag.description  Ephemeral secret management and P2P messaging
+// @tag.description  Operations for ephemeral, zero-knowledge secret storage and peer-to-peer secure messaging.
 
 // @externalDocs.description  OpenAPI
 // @externalDocs.url          https://swagger.io/resources/open-api/
 func main() {
 	log := configs.GetLogger()
-	defer configs.Sync()
+	defer log.Sync()
 
 	cfg := configs.LoadConfig(log)
 

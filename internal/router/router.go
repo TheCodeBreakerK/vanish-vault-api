@@ -18,7 +18,12 @@ type Router struct {
 }
 
 // NewRouter creates a new Router instance with the given configuration and handlers.
-func NewRouter(cfg *configs.Conf, log *zap.Logger, db *pgxpool.Pool, rdb *redis.Client) *Router {
+func NewRouter(
+	cfg *configs.Conf,
+	log *zap.Logger,
+	db *pgxpool.Pool,
+	rdb *redis.Client,
+) *Router {
 	return &Router{
 		cfg: cfg,
 		log: log,
@@ -30,6 +35,7 @@ func NewRouter(cfg *configs.Conf, log *zap.Logger, db *pgxpool.Pool, rdb *redis.
 // Setup initializes the Gin engine, sets up routes, and returns the configured engine.
 func (r *Router) Setup() {
 	router := gin.New()
+	gin.SetMode(r.cfg.GinMode)
 
 	router.Use(gin.Recovery())
 

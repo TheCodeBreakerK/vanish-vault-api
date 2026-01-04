@@ -25,7 +25,7 @@ func (r *Router) setupRoutes(engine *gin.Engine) {
 	auth := v1.Group("/auth")
 	{
 		auth.GET("/login/:provider", authHandler.NewLoginHandler(r.cfg, r.log))
-		auth.GET("/callback/:provider", authHandler.NewCallbackHandler(repo, r.log))
+		auth.GET("/callback/:provider", authHandler.NewCallbackHandler(repo, r.cfg, r.log))
 		auth.POST("/refresh", authHandler.NewRefreshHandler(repo, r.log))
 	}
 
