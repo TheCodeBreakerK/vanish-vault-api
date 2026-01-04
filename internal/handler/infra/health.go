@@ -17,15 +17,15 @@ import (
 // @Description  Checks if the service and its dependencies (database) are operational.
 // @Tags         Infra
 // @Produce      json
-// @Success      200  {object}  dto.HealthCheckResponse "Service is up and running"
-// @Failure      503  {object}  dto.ErrorResponse "Service or dependencies are down"
+// @Success      200  {object}  dto.HealthCheckResponseDto "Service is up and running"
+// @Failure      503  {object}  dto.ErrorResponseDto "Service or dependencies are down"
 // @Router       /healthz [get]
 func NewHealthCheckHandler(log *zap.Logger, db *pgxpool.Pool, rdb *redis.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		log.Info("Health check requested")
 
 		if err := db.Ping(c.Request.Context()); err != nil {
-			c.JSON(http.StatusServiceUnavailable, dto.ErrorResponse{
+			c.JSON(http.StatusServiceUnavailable, dto.ErrorResponseDto{
 				Code:    http.StatusServiceUnavailable,
 				Status:  http.StatusText(http.StatusServiceUnavailable),
 				Message: "Database connection error",
@@ -34,7 +34,7 @@ func NewHealthCheckHandler(log *zap.Logger, db *pgxpool.Pool, rdb *redis.Client)
 		}
 
 		if err := rdb.Ping(c.Request.Context()).Err(); err != nil {
-			c.JSON(http.StatusServiceUnavailable, dto.ErrorResponse{
+			c.JSON(http.StatusServiceUnavailable, dto.ErrorResponseDto{
 				Code:    http.StatusServiceUnavailable,
 				Status:  http.StatusText(http.StatusServiceUnavailable),
 				Message: "Redis connection error",
@@ -42,7 +42,7 @@ func NewHealthCheckHandler(log *zap.Logger, db *pgxpool.Pool, rdb *redis.Client)
 			return
 		}
 
-		c.JSON(http.StatusOK, dto.HealthCheckResponse{
+		c.JSON(http.StatusOK, dto.HealthCheckResponseDto{
 			Code:    http.StatusOK,
 			Status:  http.StatusText(http.StatusOK),
 			TS:      time.Now(),
