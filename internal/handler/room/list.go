@@ -1,4 +1,3 @@
-// Package room contains handlers related to secure room management.
 package room
 
 import (

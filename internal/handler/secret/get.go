@@ -1,4 +1,3 @@
-// Package secret provides handlers for distribution of encrypted secrets.
 package secret
 
 import (
