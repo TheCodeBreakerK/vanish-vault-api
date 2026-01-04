@@ -18,8 +18,10 @@
 				"mikestead.dotenv",
 				"redhat.vscode-yaml",
 				"tamasfe.even-better-toml",
-				"ms-vscode.makefile-tools",
-				"matthewpi.caddyfile-support"
+				"matthewpi.caddyfile-support",
+				"cweijan.dbclient-jdbc",
+				"cweijan.vscode-redis-client",
+				"cweijan.vscode-postgresql-client2"
 			]
 		}
 	}

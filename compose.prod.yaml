@@ -1,21 +1,19 @@
 services:
   api:
     build:
-      context: .
       target: prod
     image: vanish-vault-api:${TAG}
+    env_file:
+      - .env.prod
     restart: always
-    secrets:
-      - pg_password
     environment:
-    - GIN_MODE=release
+    - GIN_MODE=${GIN_MODE:-release}
 
   db:
     restart: always
-    environment:
-      POSTGRES_PASSWORD_FILE: /run/secrets/pg_password
-    secrets:
-      - pg_password
+
+  redis:
+    restart: always
 
   caddy:
     restart: always
@@ -23,11 +21,3 @@ services:
       - "80:80"
       - "443:443"
       - "443:443/udp"
-    volumes:
-      - ./configs/caddy/Caddyfile:/etc/caddy/Caddyfile
-      - caddy_data:/data
-      - caddy_config:/config
-
-secrets:
-  pg_password:
-    file: ./secrets/pg_password.txt

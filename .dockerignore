@@ -2,8 +2,9 @@
 .build
 build/
 tmp/
+.example.env
+.example.env.prod
 scripts/
-secrets/
 .devcontainer
 README.md
 LICENSE
