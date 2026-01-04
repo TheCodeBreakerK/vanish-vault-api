@@ -26,33 +26,32 @@ const docTemplate = `{
     "paths": {
         "/api/v1/auth/callback/{provider}": {
             "get": {
-                "description": "Receives the authorization code from the provider, exchanges it for tokens, and generates the VanishVault access JWT.",
+                "description": "Exchanges authorization code for a VanishVault JWT access token.",
+                "produces": [
+                    "application/json"
+                ],
                 "tags": [
                     "Auth"
                 ],
                 "summary": "OAuth2 Callback",
                 "parameters": [
                     {
-                        "enum": [
-                            "google",
-                            "github"
-                        ],
                         "type": "string",
-                        "description": "OAuth2 Provider",
+                        "description": "google or github",
                         "name": "provider",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "Authorization code returned by the provider",
+                        "description": "Authorization code",
                         "name": "code",
                         "in": "query",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "CSRF security state",
+                        "description": "CSRF state",
                         "name": "state",
                         "in": "query",
                         "required": true
@@ -60,26 +59,21 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Access tokens (Access Token and Refresh Token)",
+                        "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/github_com_TheCodeBreakerK_vanish-vault-api_internal_dto.CallbackResponse"
                         }
                     },
-                    "400": {
-                        "description": "Token exchange failure or invalid state",
+                    "401": {
+                        "description": "Unauthorized or invalid state",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/github_com_TheCodeBreakerK_vanish-vault-api_internal_dto.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal error processing login",
+                        "description": "Failed to process authentication",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/github_com_TheCodeBreakerK_vanish-vault-api_internal_dto.ErrorResponse"
                         }
                     }
                 }
@@ -87,14 +81,14 @@ const docTemplate = `{
         },
         "/api/v1/auth/login/{provider}": {
             "get": {
-                "description": "Returns the URL to redirect the user to the specified authentication provider or redirects automatically based on Accept header.",
+                "description": "Redirects to the auth provider or returns the URL based on the Accept header.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Get OAuth2 Login URL",
+                "summary": "Initiate OAuth2 Login",
                 "parameters": [
                     {
                         "enum": [
@@ -102,7 +96,7 @@ const docTemplate = `{
                             "github"
                         ],
                         "type": "string",
-                        "description": "OAuth2 Provider (e.g., google, github)",
+                        "description": "Auth Provider",
                         "name": "provider",
                         "in": "path",
                         "required": true
@@ -110,13 +104,13 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Returns JSON with auth URL (if Accept: application/json)",
+                        "description": "Returns JSON with auth URL",
                         "schema": {
                             "$ref": "#/definitions/github_com_TheCodeBreakerK_vanish-vault-api_internal_dto.LoginResponse"
                         }
                     },
                     "307": {
-                        "description": "Redirects to provider (if accessed via browser)",
+                        "description": "Temporary Redirect to Provider",
                         "schema": {
                             "type": "string"
                         }
@@ -128,7 +122,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal server error",
                         "schema": {
                             "$ref": "#/definitions/github_com_TheCodeBreakerK_vanish-vault-api_internal_dto.ErrorResponse"
                         }
@@ -615,6 +609,20 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "github_com_TheCodeBreakerK_vanish-vault-api_internal_dto.CallbackResponse": {
+            "type": "object",
+            "properties": {
+                "expiry_at": {
+                    "type": "integer"
+                },
+                "token": {
+                    "type": "string"
+                },
+                "token_type": {
+                    "type": "string"
+                }
+            }
+        },
         "github_com_TheCodeBreakerK_vanish-vault-api_internal_dto.ErrorResponse": {
             "type": "object",
             "properties": {
@@ -655,21 +663,29 @@ const docTemplate = `{
             }
         }
     },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "description": "Type \"Bearer \" followed by your JWT token.",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    },
     "tags": [
         {
-            "description": "Service health, monitoring and system-level endpoints",
+            "description": "Endpoints for system health monitoring, diagnostic checks, and operational status.",
             "name": "Infra"
         },
         {
-            "description": "Authentication and session management",
+            "description": "Secure identity verification and session management via OAuth2 providers and JWT issuance.",
             "name": "Auth"
         },
         {
-            "description": "Private encrypted room management",
+            "description": "Management of private encrypted communication spaces, including access control and lifecycle.",
             "name": "Rooms"
         },
         {
-            "description": "Ephemeral secret management and P2P messaging",
+            "description": "Operations for ephemeral, zero-knowledge secret storage and peer-to-peer secure messaging.",
             "name": "Secrets"
         }
     ],
