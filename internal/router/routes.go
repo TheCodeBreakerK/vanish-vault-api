@@ -1,9 +1,8 @@
-// Package router contains the route definitions for the API server.
 package router
 
 import (
-	infraHandler "github.com/TheCodeBreakerK/vanish-vault-api/internal/handler/infra"
 	authHandler "github.com/TheCodeBreakerK/vanish-vault-api/internal/handler/auth"
+	infraHandler "github.com/TheCodeBreakerK/vanish-vault-api/internal/handler/infra"
 	roomHandler "github.com/TheCodeBreakerK/vanish-vault-api/internal/handler/room"
 	secretHandler "github.com/TheCodeBreakerK/vanish-vault-api/internal/handler/secret"
 	"github.com/TheCodeBreakerK/vanish-vault-api/internal/repository"
@@ -25,7 +24,7 @@ func (r *Router) setupRoutes(engine *gin.Engine) {
 
 	auth := v1.Group("/auth")
 	{
-		auth.GET("/login/:provider", authHandler.NewLoginHandler(repo, r.log))
+		auth.GET("/login/:provider", authHandler.NewLoginHandler(r.cfg, r.log))
 		auth.GET("/callback/:provider", authHandler.NewCallbackHandler(repo, r.log))
 		auth.POST("/refresh", authHandler.NewRefreshHandler(repo, r.log))
 	}

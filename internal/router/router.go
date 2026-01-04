@@ -10,17 +10,17 @@ import (
 
 // Router struct holds the configuration and handlers for setting up routes.
 type Router struct {
-	cfg      *configs.Conf
-	log      *zap.Logger
-	db       *pgxpool.Pool
+	cfg *configs.Conf
+	log *zap.Logger
+	db  *pgxpool.Pool
 }
 
 // NewRouter creates a new Router instance with the given configuration and handlers.
 func NewRouter(cfg *configs.Conf, log *zap.Logger, db *pgxpool.Pool) *Router {
 	return &Router{
-		cfg:      cfg,
-		log:      log,
-		db:       db,
+		cfg: cfg,
+		log: log,
+		db:  db,
 	}
 }
 

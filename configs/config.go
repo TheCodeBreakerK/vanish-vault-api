@@ -15,6 +15,12 @@ type Conf struct {
 	DBName     string `mapstructure:"POSTGRES_DB"`
 	DBUser     string `mapstructure:"POSTGRES_USER"`
 	DBPassword string `mapstructure:"POSTGRES_PASSWORD"`
+
+	GoogleClientID string `mapstructure:"GOOGLE_CLIENT_ID"`
+	GoogleSecret   string `mapstructure:"GOOGLE_CLIENT_SECRET"`
+
+	GithubClientID string `mapstructure:"GITHUB_CLIENT_ID"`
+	GithubSecret   string `mapstructure:"GITHUB_CLIENT_SECRET"`
 }
 
 // LoadConfig reads the .env file and unmarshals it into the Conf struct.
