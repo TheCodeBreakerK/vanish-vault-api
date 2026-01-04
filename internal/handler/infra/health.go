@@ -8,6 +8,7 @@ import (
 	"github.com/TheCodeBreakerK/vanish-vault-api/internal/dto"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
 )
 
@@ -19,7 +20,7 @@ import (
 // @Success      200  {object}  dto.HealthCheckResponse "Service is up and running"
 // @Failure      503  {object}  dto.ErrorResponse "Service or dependencies are down"
 // @Router       /healthz [get]
-func NewHealthCheckHandler(log *zap.Logger, db *pgxpool.Pool) gin.HandlerFunc {
+func NewHealthCheckHandler(log *zap.Logger, db *pgxpool.Pool, rdb *redis.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		log.Info("Health check requested")
 
@@ -27,7 +28,16 @@ func NewHealthCheckHandler(log *zap.Logger, db *pgxpool.Pool) gin.HandlerFunc {
 			c.JSON(http.StatusServiceUnavailable, dto.ErrorResponse{
 				Code:    http.StatusServiceUnavailable,
 				Status:  http.StatusText(http.StatusServiceUnavailable),
-				Message: "disconnected",
+				Message: "Database connection error",
+			})
+			return
+		}
+
+		if err := rdb.Ping(c.Request.Context()).Err(); err != nil {
+			c.JSON(http.StatusServiceUnavailable, dto.ErrorResponse{
+				Code:    http.StatusServiceUnavailable,
+				Status:  http.StatusText(http.StatusServiceUnavailable),
+				Message: "Redis connection error",
 			})
 			return
 		}

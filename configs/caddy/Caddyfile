@@ -1,6 +1,8 @@
 :80 {
 	encode gzip
 
+	reverse_proxy /healthz api:8080
+
 	reverse_proxy /api/* api:8080 {
 		header_up Host {host}
 		header_up X-Real-IP {remote_host}
